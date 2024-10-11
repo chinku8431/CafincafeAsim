@@ -4,9 +4,18 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from fastapi.middleware.cors import CORSMiddleware
 
 # FastAPI app
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow requests from the React frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # JWT secret key and algorithm
 SECRET_KEY = "your_secret_key"
@@ -16,7 +25,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 # Simulated user database (in production, use a real database)
 fake_users_db = {
     "testuser": {
-        "username": "testuser",
+        "username": "testuser@example.com",
         "full_name": "Test User",
         "email": "testuser@example.com",
         "hashed_password": "$2b$12$KIXx5o1HHv2MO7DeuIxWWOrYH5bpIbIXhUudfgEwwVHrWFPfuS.Au",  # "password"

@@ -1,5 +1,5 @@
-// src/Login.js
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
@@ -8,63 +8,45 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      // Use URLSearchParams to send data as x-www-form-urlencoded
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
 
-    // Simple validation
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    // Fake login check
-    if (email === 'admin@example.com' && password === 'password') {
-      setError('');
-      onLogin();  // Set logged-in status in App.js
-      navigate('/home');  // Redirect to Home page
-    } else {
+      const response = await axios.post('http://localhost:8000/token', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      const token = response.data.access_token;
+      localStorage.setItem('token', token);  // Store the token in local storage
+      onLogin();  // Update the app state to logged in
+      navigate('/home');  // Redirect to the Home page
+    } catch (error) {
       setError('Invalid credentials');
     }
   };
 
   return (
-    <div className="login-container" style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
+    <div>
+      <form onSubmit={handleSubmit}>
         <h2>Login</h2>
-        {error && <p style={styles.error}>{error}</p>}
-        <div style={styles.inputGroup}>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div>
           <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <div style={styles.inputGroup}>
+        <div>
           <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <button type="submit" style={styles.button}>
-          Login
-        </button>
+        <button type="submit">Login</button>
       </form>
     </div>
   );
-};
-
-const styles = {
-  container: { /* Styling omitted for brevity */ },
-  form: { /* Styling omitted for brevity */ },
-  inputGroup: { /* Styling omitted for brevity */ },
-  input: { /* Styling omitted for brevity */ },
-  button: { /* Styling omitted for brevity */ },
-  error: { color: 'red', marginBottom: '10px' },
 };
 
 export default Login;
